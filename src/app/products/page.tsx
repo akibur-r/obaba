@@ -1,16 +1,16 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { connectDB } from "@/lib/mongodb";
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 type ProductType = {
   _id: string;
   name: string;
   description: string;
   price: number;
+  image?: string;
 };
 
 export default function ProductsPage() {
@@ -18,11 +18,15 @@ export default function ProductsPage() {
 
   useEffect(() => {
     async function fetchProducts() {
-      await connectDB();
-      const res = await fetch("/api/products");
-      const data = await res.json();
-      setProducts(data);
+      try {
+        const res = await fetch("/api/products");
+        const data: ProductType[] = await res.json();
+        setProducts(data);
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+      }
     }
+
     fetchProducts();
   }, []);
 
@@ -31,17 +35,21 @@ export default function ProductsPage() {
       <h1 className="text-3xl font-bold mb-12 text-center">Our Products</h1>
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => (
-          <Card key={product._id}>
+          <Card key={product._id} className="flex flex-col justify-between">
             <CardHeader>
               <CardTitle>{product.name}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>{product.description}</p>
-              <p>${product.price}</p>
+              <p className="text-gray-600 dark:text-gray-300 mb-2">
+                {product.description}
+              </p>
+              <p className="font-semibold">${product.price}</p>
             </CardContent>
-            <Button asChild className="w-full">
-              <Link href={`/products/${product._id}`}>View Details</Link>
-            </Button>
+            <CardFooter>
+              <Button asChild className="w-full">
+                <Link href={`/products/${product._id}`}>View Details</Link>
+              </Button>
+            </CardFooter>
           </Card>
         ))}
       </div>
