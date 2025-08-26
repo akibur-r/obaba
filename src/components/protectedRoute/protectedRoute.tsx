@@ -1,22 +1,20 @@
 "use client";
 
-import { AuthContext } from "@/providers";
+import { ReactNode, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { ReactNode, useContext, useEffect } from "react";
 
 type Props = { children: ReactNode };
 
 export default function ProtectedRoute({ children }: Props) {
-  const { user, loading } = useContext(AuthContext);
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-    }
-  }, [user, loading, router]);
+    if (status === "unauthenticated") router.push("/login");
+  }, [status, router]);
 
-  if (loading || !user) return <div>Loading...</div>;
+  if (status === "loading" || !session) return <div>Loading...</div>;
 
   return <>{children}</>;
 }

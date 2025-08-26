@@ -1,15 +1,13 @@
 "use client";
-import { auth } from "@/lib/firebase";
-import { AuthContext } from "@/providers";
-import { signOut } from "firebase/auth";
-import Link from "next/link";
-import { useContext } from "react";
 
+import { useSession, signOut } from "next-auth/react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
 import Image from "next/image";
 
 export default function Navbar() {
-  const { user } = useContext(AuthContext);
+  const { data: session } = useSession();
 
   return (
     <header className="border-b bg-cyan-500 dark:bg-gray-900">
@@ -21,17 +19,14 @@ export default function Navbar() {
           <Link href="/products" className="hover:text-blue-600">
             Products
           </Link>
-          {!user ? (
+          {!session ? (
             <Link href="/login" className="px-3 py-1 border rounded">
               Login
             </Link>
           ) : (
-            <button
-              onClick={() => signOut(auth)}
-              className="px-3 py-1 border rounded"
-            >
+            <Button onClick={() => signOut()} className="px-3 py-1 border rounded">
               Logout
-            </button>
+            </Button>
           )}
         </nav>
       </div>

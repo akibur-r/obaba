@@ -1,24 +1,26 @@
 import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { name, description, price } = body;
+    const { name, description, price } = await req.json();
 
     if (!name || !description || !price) {
-      return NextResponse.json(
-        { error: "All fields are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
     await connectDB();
-    const product = await Product.create({ name, description, price });
+
+    const product = await Product.create({
+      name,
+      description,
+      price,
+    });
+
     return NextResponse.json(product, { status: 201 });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     return NextResponse.json(
       { error: "Failed to add product" },
       { status: 500 }
