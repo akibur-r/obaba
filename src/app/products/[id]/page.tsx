@@ -1,23 +1,45 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import fs from "fs";
+import { connectDB } from "@/lib/mongodb";
+import Product from "@/models/Product";
+import { Types } from "mongoose";
 import { notFound } from "next/navigation";
-import path from "path";
 
-type Product = {
-  id: string;
+type ProductType = {
+  _id: string;
   name: string;
   description: string;
   price: number;
   image?: string;
 };
 
-async function getProduct(id: string): Promise<Product | null> {
-  const filePath = path.join(process.cwd(), "data", "products.json");
-  const data = fs.readFileSync(filePath, "utf-8");
-  const products: Product[] = JSON.parse(data);
+async function getProduct(id: string): Promise<ProductType | null> {
+  await connectDB();
 
-  const product = products.find((p) => p.id === id);
-  return product || null;
+  // Validate id
+  if (!Types.ObjectId.isValid(id)) return null;
+
+  const product = await Product.findById(id, {
+    name: 1,
+    description: 1,
+    price: 1,
+    image: 1,
+  }).lean<{
+    _id: Types.ObjectId;
+    name: string;
+    description: string;
+    price: number;
+    image?: string;
+  }>();
+
+  if (!product) return null;
+
+  return {
+    _id: product._id.toString(),
+    name: product.name,
+    description: product.description,
+    price: product.price,
+    image: product.image,
+  };
 }
 
 export default async function ProductDetailsPage({
@@ -41,18 +63,14 @@ export default async function ProductDetailsPage({
           <p className="text-gray-600 dark:text-gray-300 mb-4">
             {product.description}
           </p>
-          <p className="text-lg font-semibold mb-2">Price: ${product.price}</p>
+          <p className="text-lg font-semibold mb-4">Price: ${product.price}</p>
           {product.image && (
             <div className="relative w-full h-64">
-              <div className="relative w-full h-64">
-                <div className="relative w-full h-64">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="object-cover rounded-lg"
-                  />
-                </div>
-              </div>
+              <img
+                src={product.image}
+                alt={product.name}
+                className="object-cover rounded-lg w-full h-full"
+              />
             </div>
           )}
         </CardContent>
