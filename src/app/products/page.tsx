@@ -1,16 +1,21 @@
 "use client";
-
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 type ProductType = {
   _id: string;
   name: string;
   description: string;
   price: number;
-  image?: string;
+  image?: string | null;
 };
 
 export default function ProductsPage() {
@@ -35,15 +40,13 @@ export default function ProductsPage() {
       <h1 className="text-3xl font-bold mb-12 text-center">Our Products</h1>
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => (
-          <Card key={product._id} className="flex flex-col justify-between">
+          <Card key={product._id}>
             <CardHeader>
               <CardTitle>{product.name}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 dark:text-gray-300 mb-2">
-                {product.description}
-              </p>
-              <p className="font-semibold">${product.price}</p>
+              <p>{product.description}</p>
+              <p>${product.price}</p>
             </CardContent>
             <CardFooter>
               <Button asChild className="w-full">

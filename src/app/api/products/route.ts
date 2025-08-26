@@ -2,27 +2,37 @@ import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    const { name, description, price } = await req.json();
-
-    if (!name || !description || !price) {
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
-    }
-
     await connectDB();
 
-    const product = await Product.create({
-      name,
-      description,
-      price,
-    });
+    // Type the lean result
+    const products = await Product.find(
+      {},
+      { name: 1, description: 1, price: 1, image: 1 }
+    ).lean<
+      {
+        _id: { toString(): string };
+        name: string;
+        description: string;
+        price: number;
+        image?: string;
+      }[]
+    >();
 
-    return NextResponse.json(product, { status: 201 });
+    const formatted = products.map((p) => ({
+      _id: p._id.toString(),
+      name: p.name,
+      description: p.description,
+      price: p.price,
+      image: p.image || null,
+    }));
+
+    return NextResponse.json(formatted);
   } catch (err) {
     console.error(err);
     return NextResponse.json(
-      { error: "Failed to add product" },
+      { error: "Failed to fetch products" },
       { status: 500 }
     );
   }
