@@ -1,10 +1,10 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
+import { Button } from "@/components/ui/button";
+import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -15,16 +15,22 @@ export default function Navbar() {
         <Link href="/" className="text-2xl font-bold">
           <Image src={logo} alt="Obaba.com Logo" className="h-10 w-fit" />
         </Link>
+        <Link href="/products" className="hover:text-blue-600">
+          Products
+        </Link>
         <nav className="flex gap-4 items-center">
-          <Link href="/products" className="hover:text-blue-600">
-            Products
+          <Link href="/dashboard/add-product" className="hover:text-blue-600">
+            Add Product
           </Link>
           {!session ? (
             <Link href="/login" className="px-3 py-1 border rounded">
               Login
             </Link>
           ) : (
-            <Button onClick={() => signOut()} className="px-3 py-1 border rounded">
+            <Button
+              onClick={() => signOut()}
+              className="px-3 py-1 border rounded"
+            >
               Logout
             </Button>
           )}
